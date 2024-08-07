@@ -1,0 +1,52 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # Adjust if you track a different branch in EmulatorWeb/EmulatorWeb
+
+jobs:
+  deploy:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Main Repository (emulatorweb.github.io)
+      uses: actions/checkout@v2
+      with:
+        repository: EmulatorWeb/emulatorweb.github.io
+        path: main-repo
+
+    - name: Checkout Website Code Repository (EmulatorWeb)
+      uses: actions/checkout@v2
+      with:
+        repository: EmulatorWeb/EmulatorWeb
+        path: emulatorweb
+
+    - name: Set Up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '20'
+
+    - name: Install Dependencies
+      run: |
+        cd emulatorweb
+        npm install
+
+    - name: Run Node Script
+      run: |
+        cd emulatorweb
+        node index.js
+
+    - name: Copy Built Files to Main Repository
+      run: |
+        Remove-Item -Recurse -Force main-repo\* # Remove all contents in main-repo root
+        Copy-Item -Recurse -Force emulatorweb\dist\* main-repo\ # Copy built files to root of main-repo
+
+    - name: Commit and Push Changes
+      run: |
+        cd main-repo
+        git add .
+        git commit -m "Update GitHub Pages from EmulatorWeb" || echo "No changes to commit"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

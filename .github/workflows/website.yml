@@ -6,7 +6,7 @@ on:
       - main  # Adjust if you track a different branch in EmulatorWeb/EmulatorWeb
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: windows-latest
 
     steps:
@@ -32,10 +32,10 @@ jobs:
         cd emulatorweb
         npm install
 
-    - name: Run Node Script
+    - name: Build Static Files
       run: |
         cd emulatorweb
-        node index.js
+        node build.js
 
     - name: Copy Built Files to Main Repository
       run: |
